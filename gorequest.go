@@ -372,6 +372,13 @@ func (s *SuperAgent) Set(param string, value string) *SuperAgent {
 	return s
 }
 
+func (s *SuperAgent) SetHeaders(header http.Header) *SuperAgent {
+	for k, v := range header {
+		s.Header[k] = v
+	}
+	return s
+}
+
 // AppendHeader is used for setting header fileds with multiple values,
 // Example. To set `Accept` as `application/json, text/plain`
 //

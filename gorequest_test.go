@@ -240,6 +240,7 @@ func TestMakeRequest(t *testing.T) {
 func TestGet(t *testing.T) {
 	const case1_empty = "/"
 	const case2_set_header = "/set_header"
+	const case3_set_headers = "/set_headers"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// check method is GET before going to check other features
 		if r.Method != GET {
@@ -258,6 +259,14 @@ func TestGet(t *testing.T) {
 			if r.Header.Get("API-Key") != "fookey" {
 				t.Errorf("Expected 'API-Key' == %q; got %q", "fookey", r.Header.Get("API-Key"))
 			}
+		case case3_set_headers:
+			t.Logf("case %v ", case3_set_headers)
+			if r.Header.Get("API-Key") != "fookey" {
+				t.Errorf("Expected 'API-Key' == %q; got %q", "fookey", r.Header.Get("API-Key"))
+			}
+			if r.Header.Get("hello") != "world" {
+				t.Errorf("Expected 'hello' == %q; got %q", "world", r.Header.Get("hello"))
+			}
 		}
 	}))
 
@@ -269,6 +278,12 @@ func TestGet(t *testing.T) {
 	New().Get(ts.URL+case2_set_header).
 		Set("API-Key", "fookey").
 		End()
+
+	New().Get(ts.URL + case3_set_headers).
+		SetHeaders(http.Header{
+			"API-Key": {"fookey"},
+			"hello":   {"world"},
+		}).End()
 }
 
 // testing for Get method.. but clone our base.
@@ -1816,9 +1831,14 @@ func TestQueryFunc(t *testing.T) {
 		switch r.URL.Path {
 		default:
 			t.Errorf("No testing for this case yet : %q", r.URL.Path)
-		case case1_send_string, case2_send_struct:
+		case case1_send_string:
 			checkQuery(t, v, "query1", "test1")
 			checkQuery(t, v, "query2", "test2")
+
+		case case2_send_struct:
+			checkQuery(t, v, "Query1", "test1")
+			checkQuery(t, v, "Query2", "test2")
+
 		case case3_send_string_with_duplicates:
 			checkQuery(t, v, "query1", "test1")
 			checkQuery(t, v, "query2", "test2")
